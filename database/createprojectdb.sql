@@ -11,6 +11,7 @@ CREATE TABLE User (
     Email VARCHAR(100) UNIQUE NOT NULL,
     PasswordHash VARCHAR(255) NOT NULL
 );
+CREATE INDEX idx_user_email ON User(Email);
 
 -- =========================
 -- VEHICLE
@@ -25,6 +26,7 @@ CREATE TABLE Vehicle (
     CurrentMileage INT,
     FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE RESTRICT
 );
+CREATE INDEX idx_vehicle_userid ON Vehicle(UserID);
 
 
 -- =========================
@@ -63,6 +65,12 @@ CREATE TABLE MaintenanceRecord (
     FOREIGN KEY (ProviderID) REFERENCES ServiceProvider(ProviderID) ON DELETE SET NULL
 );
 
+-- MaintenanceRecord: Common lookups by VehicleID, TypeID, ProviderID
+CREATE INDEX idx_maintrecord_vehicleid ON MaintenanceRecord(VehicleID);
+CREATE INDEX idx_maintrecord_typeid ON MaintenanceRecord(TypeID);
+CREATE INDEX idx_maintrecord_providerid ON MaintenanceRecord(ProviderID);
+
+
 -- =========================
 -- PART
 -- =========================
@@ -85,6 +93,8 @@ CREATE TABLE RecordPart (
     FOREIGN KEY (PartID) REFERENCES Part(PartID) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_recordpart_recordid ON RecordPart(RecordID);
+CREATE INDEX idx_recordpart_partid ON RecordPart(PartID);
 -- =========================
 -- DOCUMENT
 -- =========================
@@ -95,6 +105,7 @@ CREATE TABLE Document (
     FileURL VARCHAR(255),
     FOREIGN KEY (RecordID) REFERENCES MaintenanceRecord(RecordID) ON DELETE CASCADE
 );
+CREATE INDEX idx_document_recordid ON Document(RecordID);
 
 -- =========================
 -- NOTIFICATION
@@ -109,6 +120,8 @@ CREATE TABLE Notification (
     FOREIGN KEY (RecordID) REFERENCES MaintenanceRecord(RecordID) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_notification_userid ON Notification(UserID);
+CREATE INDEX idx_notification_recordid ON Notification(RecordID);
 -- =========================
 -- MAINTENANCE SCHEDULE
 -- =========================
@@ -121,7 +134,8 @@ CREATE TABLE MaintenanceSchedule (
     FOREIGN KEY (VehicleID) REFERENCES Vehicle(VehicleID) ON DELETE CASCADE,
     FOREIGN KEY (TypeID) REFERENCES MaintenanceType(TypeID) ON DELETE CASCADE
 );
-
+CREATE INDEX idx_schedule_vehicleid ON MaintenanceSchedule(VehicleID);
+CREATE INDEX idx_schedule_typeid ON MaintenanceSchedule(TypeID);
 -- USERS
 INSERT INTO User (FullName, Email, PasswordHash) VALUES
 ('Dev Ghai', 'dev.ghai@sjsu.edu', 'hashed_pw_1'),
